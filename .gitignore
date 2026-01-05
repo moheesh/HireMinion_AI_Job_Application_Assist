@@ -1,0 +1,45 @@
+# Environment
+.env
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# Downloaded files (keep folder, ignore contents)
+downloaded/*
+!downloaded/.gitkeep
+
+# Output files (keep folder, ignore contents)
+output/*
+!output/.gitkeep
+
+# Data files (keep folder, ignore contents except .tex templates)
+data/*
+!data/.gitkeep
+
+
+# Templates (keep folder and structure)
+templates/*
+!templates/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node (for extension)
+node_modules/
+
+# Misc
+*.bak
+*.tmp

@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-multipart
+beautifulsoup4
+google-generativeai
+weasyprint
+fpdf2
+jinja2
+pandas
+pyarrow
+python-dotenv
+websockets
+pymupdf

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Resume Tailor</title>
+  <style>
+    body { width: 260px; padding: 16px; font-family: -apple-system, sans-serif; font-size: 14px; }
+    button { width: 100%; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 8px; background: #667eea; }
+    button:hover { background: #5a6fd6; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .checkbox-group { margin-bottom: 12px; }
+    .checkbox-group label { display: block; margin: 6px 0; cursor: pointer; }
+    #status { margin-top: 8px; font-size: 12px; min-height: 20px; }
+    .success { color: green; }
+    .error { color: red; }
+    .info { color: #667eea; }
+    .hidden { display: none; }
+    select { width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+    #resumeSelect { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="chkResume"> Tailor Resume</label>
+      <label><input type="checkbox" id="chkCover"> Tailor Cover Letter</label>
+      <label><input type="checkbox" id="chkLinkedin"> LinkedIn Message</label>
+    </div>
+    <div id="resumeSelectContainer" class="hidden">
+      <select id="resumeSelect">
+        <option value="">Select a resume...</option>
+      </select>
+    </div>
+    <button id="scrapeBtn">🔍 Start Scrape</button>
+    <button id="storeBtn">💾 Store Information</button>
+    <button id="clearBtn">🗑️ Clear All</button>
+  </div>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

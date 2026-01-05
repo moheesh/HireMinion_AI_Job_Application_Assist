@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Resume Tailor",
+  "version": "1.0.0",
+  "description": "Scrape job postings and tailor resume",
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Resume Tailor"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
