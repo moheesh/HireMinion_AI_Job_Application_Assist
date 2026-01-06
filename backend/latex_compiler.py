@@ -12,13 +12,11 @@ from jinja2 import Environment, BaseLoader
 # CONFIGURATION
 # ============================================================
 
-# Directory structure (relative to project root)
 BASE_DIR = Path(__file__).parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 DOWNLOADED_DIR = BASE_DIR / "downloaded"
 OUTPUT_DIR = BASE_DIR / "output"
 
-# Create directories if they don't exist
 TEMPLATES_DIR.mkdir(exist_ok=True)
 DOWNLOADED_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -29,10 +27,25 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # ============================================================
 
 def load_json_file(path: Path) -> dict:
-    """Load JSON file, return empty dict if not found."""
     if path.exists():
         return json.loads(path.read_text(encoding="utf-8"))
     return {}
+
+
+def format_skill_key(key: str) -> str:
+    """Convert skill key to display name: data_warehousing -> Data Warehousing"""
+    return key.replace('_', ' ').title()
+
+
+def preprocess_data(data: dict) -> dict:
+    """Preprocess JSON data before rendering."""
+    # Convert skills dict to list of tuples for easier iteration
+    if 'skills' in data and isinstance(data['skills'], dict):
+        data['skills_list'] = [
+            (format_skill_key(k), v) 
+            for k, v in data['skills'].items()
+        ]
+    return data
 
 
 # ============================================================
@@ -40,7 +53,6 @@ def load_json_file(path: Path) -> dict:
 # ============================================================
 
 def latex_escape(text: str) -> str:
-    """Escape special LaTeX characters (but NOT backslash, braces for commands)."""
     if not isinstance(text, str):
         return str(text) if text is not None else ""
     
@@ -61,11 +73,12 @@ def latex_escape(text: str) -> str:
 
 
 def escape_json_data(data) -> dict:
-    """Recursively escape all string values in JSON data."""
     if isinstance(data, dict):
         return {k: escape_json_data(v) for k, v in data.items()}
     elif isinstance(data, list):
         return [escape_json_data(item) for item in data]
+    elif isinstance(data, tuple):
+        return tuple(escape_json_data(item) for item in data)
     elif isinstance(data, str):
         return latex_escape(data)
     else:
@@ -77,7 +90,6 @@ def escape_json_data(data) -> dict:
 # ============================================================
 
 def create_jinja_environment() -> Environment:
-    """Create Jinja2 environment with LaTeX-safe delimiters."""
     env = Environment(
         loader=BaseLoader(),
         block_start_string=r"\BLOCK{",
@@ -106,25 +118,16 @@ def render_template(
     data_source: str = "downloads",
     escape_latex: bool = True
 ) -> str:
-    """
-    Merge a template with JSON data to create final LaTeX content.
-    
-    Returns:
-        Rendered LaTeX content as string
-    """
     if data_filename is None:
         data_filename = template_name
     
-    # Locate template file
     template_path = TEMPLATES_DIR / f"{template_name}.tex"
     
-    # Locate data file
     if data_source == "downloaded":
         data_path = DOWNLOADED_DIR / f"{data_filename}.json"
     else:
         data_path = TEMPLATES_DIR / f"{data_filename}.json"
     
-    # Validate files exist
     if not template_path.exists():
         raise FileNotFoundError(f"Template not found: {template_path}")
     if not data_path.exists():
@@ -133,17 +136,17 @@ def render_template(
     print(f"Template: {template_path}")
     print(f"Data: {data_path}")
     
-    # Load template and data
     template_content = template_path.read_text(encoding="utf-8")
     raw_data = json.loads(data_path.read_text(encoding="utf-8"))
     
-    # Escape LaTeX special characters
+    # Preprocess data (convert skills dict to list)
+    raw_data = preprocess_data(raw_data)
+    
     if escape_latex:
         data = escape_json_data(raw_data)
     else:
         data = raw_data
     
-    # Initialize Jinja2 and render
     env = create_jinja_environment()
     template = env.from_string(template_content)
     rendered = template.render(**data)
@@ -152,12 +155,6 @@ def render_template(
 
 
 def compile_to_pdf(latex_content: str, output_name: str) -> Path:
-    """
-    Compile LaTeX content to PDF using online API.
-    
-    Returns:
-        Path to generated PDF, or None if failed
-    """
     api_url = "https://latexonline.cc/compile"
     
     params = {
@@ -194,20 +191,6 @@ def compile_resume(
     output_name: str = None,
     escape_latex: bool = True
 ) -> Path:
-    """
-    Full pipeline: Template + JSON → PDF
-    
-    Args:
-        template_name: Name of template file (without .tex extension)
-        data_filename: Name of JSON file (without .json extension)
-        data_source: "downloads" or "templates" - where to find JSON
-        output_name: Custom name for output PDF (optional)
-        escape_latex: Whether to escape LaTeX special characters
-    
-    Returns:
-        Path to generated PDF
-    """
-    # Render the template
     rendered = render_template(
         template_name=template_name,
         data_filename=data_filename,
@@ -215,16 +198,13 @@ def compile_resume(
         escape_latex=escape_latex
     )
     
-    # Determine output filename
     if output_name is None:
         output_name = template_name
     
-    # Compile to PDF
     return compile_to_pdf(rendered, output_name)
 
 
 def list_available():
-    """List all available templates and data files."""
     print("Templates (in templates/):")
     templates = list(TEMPLATES_DIR.glob("*.tex"))
     if templates:
@@ -250,21 +230,15 @@ def list_available():
 
 
 def auto_compile():
-    """
-    Automatically compile using metadata.json and tailored_resume.json
-    Reads template name from metadata, uses tailored_resume.json as data
-    """
     print("="*50)
     print("AUTO COMPILE - Using metadata.json")
     print("="*50)
     
-    # Load metadata
     metadata = load_json_file(DOWNLOADED_DIR / "metadata.json")
     if not metadata:
         print("✗ metadata.json not found in downloaded/")
         return None
     
-    # Get template name from metadata
     resume_file = metadata.get("options", {}).get("resumeFile", "")
     if not resume_file:
         print("✗ resumeFile not found in metadata.json")
@@ -273,7 +247,6 @@ def auto_compile():
     template_name = Path(resume_file).stem
     print(f"Template: {template_name}")
     
-    # Check if tailored_resume.json exists
     tailored_path = DOWNLOADED_DIR / "tailored_resume.json"
     if not tailored_path.exists():
         print("✗ tailored_resume.json not found in downloaded/")
@@ -281,7 +254,6 @@ def auto_compile():
     
     print(f"Data: tailored_resume.json")
     
-    # Compile
     return compile_resume(
         template_name=template_name,
         data_filename="tailored_resume",
@@ -307,29 +279,11 @@ if __name__ == "__main__":
         default="auto",
         help="Action to perform (default: auto)"
     )
-    parser.add_argument(
-        "--template", "-t",
-        help="Template name (without .tex extension)"
-    )
-    parser.add_argument(
-        "--data", "-d",
-        help="Data filename (without .json extension, defaults to template name)"
-    )
-    parser.add_argument(
-        "--source", "-s",
-        choices=["downloaded", "templates"],
-        default="downloaded",
-        help="Where to find JSON data (default: downloaded)"
-    )
-    parser.add_argument(
-        "--output", "-o",
-        help="Custom output filename (without extension)"
-    )
-    parser.add_argument(
-        "--no-escape",
-        action="store_true",
-        help="Don't escape LaTeX special characters in data"
-    )
+    parser.add_argument("--template", "-t", help="Template name (without .tex)")
+    parser.add_argument("--data", "-d", help="Data filename (without .json)")
+    parser.add_argument("--source", "-s", choices=["downloaded", "templates"], default="downloaded")
+    parser.add_argument("--output", "-o", help="Custom output filename")
+    parser.add_argument("--no-escape", action="store_true")
     
     args = parser.parse_args()
     

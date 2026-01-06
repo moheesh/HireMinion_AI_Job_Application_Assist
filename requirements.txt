@@ -11,3 +11,4 @@ pyarrow
 python-dotenv
 websockets
 pymupdf
+supabase

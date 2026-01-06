@@ -27,7 +27,7 @@ Respond with clearly separated JSON blocks using these exact delimiters:
 
 ## RULES FOR TAILORED RESUME
 - **Structure:** Output MUST have the EXACT same JSON structure/keys as the template.
-- **Objective:** Create a top 0.1% resume. Every line must fight for the candidate's relevance.
+- **Objective:** Create a top 0.01% resume. Every line must fight for the candidate's relevance.
 
 ---
 
@@ -64,7 +64,7 @@ This tricks ATS and recruiters into thinking "This person is already one of us."
 
 ---
 
-### 3. SKILL DECOMPOSITION (Most Resumes Fail Here)
+### 3. SKILL DECOMPOSITION
 
 Don't list generic skills. Decompose them with JD-aligned sub-skills.
 
@@ -91,6 +91,7 @@ Python (Pandas, data validation, ETL orchestration, automation)
 - Expand existing tools to sub-skills the JD mentions
 - Reorder skills so JD-critical ones appear FIRST
 - Only add sub-skills that are standard features of the parent tool
+- You can add skills only if its mentioned in my resume/data/template or kind of similar
 
 ---
 
@@ -260,14 +261,20 @@ Extract from job description:
   "location": "Location",
   "work_type": "Remote/Hybrid/Onsite",
   "job_number": "Job ID if available",
-  "salary_range": "Salary range if available",
+  "min_salary": "Salary Minimum if available",
+  "max_salary": "Salary Maximum if available",
   "required_skills": ["skill1", "skill2"],
   "nice_to_have": ["skill1", "skill2"],
   "experience_years": "X+ years",
   "clearance": "Security clearance if mentioned",
   "url": "Job URL",
+  "posted_date": "if its mentioned today, then calculate the timestamp",
+  "short_description": "small job description in paragraph, around 100 words",
+  "work_type": "fulltime/parttime/contract/w2 etc",
+  "min qualification": "get the points such as ms in computer science or engineering etc"
   "scraped_at": "Timestamp from metadata"
 }
 - Use null for unavailable fields
 - Extract ALL required skills mentioned
 - Distinguish between "required" and "nice to have"
+- Do not change the key names

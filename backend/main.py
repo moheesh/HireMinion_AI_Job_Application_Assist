@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from cleaning import clean_file
 from gemini_client import tailor_resume
 from latex_compiler import auto_compile
+from supabase_job_storage import JobStorage
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -29,6 +30,9 @@ os.makedirs(DOWNLOADED_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
 
+# Initialize Supabase storage
+job_storage = JobStorage()
+
 
 class ScrapeRequest(BaseModel):
     html: str
@@ -37,23 +41,38 @@ class ScrapeRequest(BaseModel):
 
 
 def run_pipeline():
-    """Run the full pipeline: clean → tailor → compile"""
+    """Run the full pipeline: clean → tailor → store → compile"""
     try:
         print("\n" + "="*50)
         print("RUNNING FULL PIPELINE")
         print("="*50)
         
         # Step 1: Clean HTML
-        print("\n[1/3] Cleaning HTML...")
+        print("\n[1/4] Cleaning HTML...")
         clean_result = clean_file()
         print(f"  ✓ Cleaned: {clean_result['text_path']}")
         
         # Step 2: Tailor resume with Gemini
-        print("\n[2/3] Tailoring with Gemini...")
+        print("\n[2/4] Tailoring with Gemini...")
         tailor_resume()
         
-        # Step 3: Compile to PDF
-        print("\n[3/3] Compiling PDF...")
+        # Step 3: Store job details to Supabase + local archive
+        print("\n[3/4] Storing job...")
+        job_details_path = os.path.join(DOWNLOADED_DIR, "job_details.json")
+        tailored_resume_path = os.path.join(DOWNLOADED_DIR, "tailored_resume.json")
+        
+        if os.path.exists(job_details_path):
+            # Online: Supabase
+            job_storage.store(job_details_path)
+            print("  ✓ Stored to Supabase")
+            
+            # Local: archive.json
+            job_storage.archive_resume(job_details_path, tailored_resume_path)
+        else:
+            print("  ⚠ No job_details.json found, skipping storage")
+        
+        # Step 4: Compile to PDF
+        print("\n[4/4] Compiling PDF...")
         pdf_path = auto_compile()
         
         if pdf_path:
@@ -163,6 +182,36 @@ async def get_status():
             status["job_details"] = json.load(f)
     
     return status
+
+
+@app.get("/api/jobs")
+async def get_jobs(limit: int = 100):
+    """Get all stored jobs from Supabase"""
+    try:
+        jobs = job_storage.get_all(limit=limit)
+        return {"success": True, "count": len(jobs), "jobs": jobs}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.get("/api/jobs/count")
+async def get_job_count():
+    """Get total job count"""
+    try:
+        count = job_storage.count()
+        return {"success": True, "count": count}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.get("/api/archives")
+async def get_archives():
+    """Get all locally archived resumes"""
+    try:
+        archives = job_storage.list_archives()
+        return {"success": True, "count": len(archives), "archives": archives}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 @app.delete("/api/clear")
