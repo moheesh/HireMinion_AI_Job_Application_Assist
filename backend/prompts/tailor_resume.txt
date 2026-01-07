@@ -31,6 +31,58 @@ Respond with clearly separated JSON blocks using these exact delimiters:
 
 ---
 
+### 0. SUMMARY TAILORING (First Impression)
+
+The Summary is the first thing recruiters read. It MUST be tailored to mirror JD language.
+
+#### Summary Formula:
+**[Role Title] with [X years] + [Core JD-aligned expertise] + [Key achievement pattern] + [Top 2-3 JD tools/skills] + [Certification if relevant]**
+
+#### Summary Tailoring Rules:
+
+1. **Mirror the JD's role language**
+   - JD says "Data Lakehouse" → Summary mentions "Data Lakehouse"
+   - JD says "data products" → Summary mentions "data products"
+   - JD says "single version of the truth" → Summary uses that phrase
+
+2. **Front-load JD priorities**
+   - First sentence must address the #1 JD requirement
+   - If JD emphasizes "secure, reliable" → lead with that
+   - If JD emphasizes "cloud platforms" → lead with cloud experience
+
+3. **Include JD-specific domain language**
+   - JD mentions "financial services" → add "enterprise/regulated environments"
+   - JD mentions "Agile" → mention "Agile delivery"
+
+4. **Keep it tight**
+   - Maximum 3 sentences or ~50-60 words
+   - No fluff, every word must earn its place
+
+#### Summary Before/After Example:
+
+**Original:**
+```
+Data Engineer with 4+ years building production ELT pipelines, dimensional models, and data platform infrastructure. Experience processing multi-million record datasets from ERP/CRM systems (Salesforce, HubSpot, SAP) into cloud data warehouses. Core stack: Snowflake, Azure, dbt, PySpark, Airflow.
+```
+
+**JD Emphasis:** Data Lakehouse, secure/reliable, AWS, data products, Agile, single version of truth
+
+**Tailored:**
+```
+Data Engineer with 4+ years architecting secure, reliable Data Lakehouse solutions and production ETL pipelines. Proven ability to deliver ready-to-use data products serving as single version of truth for analytics and operations. Expert in Python, SQL, Cloud platforms (Azure/AWS), and Agile delivery. Microsoft Fabric Data Engineer certified.
+```
+
+**What Changed:**
+- Added "Data Lakehouse" (JD term)
+- Added "secure, reliable" (JD emphasis)
+- Added "data products" (JD term)
+- Added "single version of truth" (exact JD phrase)
+- Added "Agile delivery" (JD requirement)
+- Added AWS alongside Azure
+- Moved certification mention up
+
+---
+
 ### 1. DUAL OPTIMIZATION (ATS + Hiring Manager)
 
 #### ATS Requirements:
@@ -59,6 +111,8 @@ Examples:
 - JD says "Clients" → Don't say "Customers"
 - JD says "Revenue" → Don't say "Sales"
 - JD says "Data Platform" → Don't say "Data System"
+- JD says "Data Lakehouse" → Don't say "Data Warehouse" alone
+- JD says "Data Products" → Don't say "Data Assets"
 
 This tricks ATS and recruiters into thinking "This person is already one of us."
 
@@ -91,11 +145,148 @@ Python (Pandas, data validation, ETL orchestration, automation)
 - Expand existing tools to sub-skills the JD mentions
 - Reorder skills so JD-critical ones appear FIRST
 - Only add sub-skills that are standard features of the parent tool
-- You can add skills only if its mentioned in my resume/data/template or kind of similar
+- You can add skills only if mentioned in resume/data/template or closely related
 
 ---
 
-### 4. FRONT-LOAD VALUE + METRICS
+### 3A. RELATED TOOLS MAPPING
+
+When candidate lacks exact JD tool but has equivalent experience, use this mapping:
+
+| JD Asks For | Acceptable Alternatives (if candidate has them) |
+|-------------|------------------------------------------------|
+| Kafka | Kinesis, Pub/Sub, Event Hubs, Flink, Spark Streaming |
+| AWS (S3, Lambda, Redshift, Glue) | Azure (Blob, Functions, Synapse, Data Factory), GCP equivalents |
+| Jenkins | GitHub Actions, GitLab CI, CircleCI, Azure DevOps |
+| Airflow | Prefect, Dagster, Luigi, Azure Data Factory |
+| Spark | PySpark, Databricks, EMR |
+| Snowflake | BigQuery, Redshift, Synapse, Databricks SQL |
+| Terraform | CloudFormation, Pulumi, ARM Templates |
+| dbt | Dataform, SQLMesh, custom SQL transformations |
+| Kubernetes | Docker Swarm, ECS, GKE, AKS |
+| Tableau | Power BI, Looker, Metabase, QuickSight |
+
+**Rules for Substitution:**
+- List the tool candidate ACTUALLY has, not the JD tool
+- Frame broadly when possible: "Cloud platforms (Azure, AWS concepts)" 
+- In bullets, emphasize the transferable pattern: "orchestrated pipelines using Airflow (transferable to any workflow engine)"
+- NEVER claim the JD tool if candidate hasn't used it
+
+---
+
+### 3B. SOFTEN VS. CLAIM VS. REMOVE DECISION MATRIX
+
+When candidate has partial or indirect experience with a JD-required tool:
+
+| Experience Level | Action | Example |
+|------------------|--------|---------|
+| **Production use (6+ months)** | Claim fully | "AWS (S3, Lambda, Glue)" |
+| **Project/coursework use** | Claim with context | "AWS (S3, Lambda - project experience)" |
+| **Certification only** | Soften | "AWS (certified, hands-on with Azure)" |
+| **Studied/tutorials only** | Soften heavily | "AWS concepts" or omit |
+| **Never touched** | Remove entirely | Do NOT add |
+
+**Softening Phrases:**
+- "X concepts" → studied but limited hands-on
+- "X fundamentals" → basic understanding
+- "Familiarity with X" → exposure but not production
+- "X (transitioning from Y)" → have equivalent, learning target
+
+**When to Remove Instead of Soften:**
+- If softened skill would appear more than twice in Skills section (looks weak)
+- If JD lists it as "required" with "X+ years" and candidate has zero
+- If it would raise red flags in interview you can't defend
+
+---
+
+### 3C. REQUIRED VS. NICE-TO-HAVE HANDLING
+
+JDs typically have two tiers. Handle them differently:
+
+**REQUIRED Skills:**
+- Aggressively cover in Skills, Experience, AND Projects
+- Use related tools mapping if exact tool missing
+- Apply Domain Bridging if needed
+- Must appear in at least 2 places on resume
+
+**NICE-TO-HAVE Skills:**
+- Only include if candidate has genuine experience
+- Do NOT stretch or soften to include
+- Do NOT add to Skills section just for keyword match
+- Include only if it fits naturally into existing bullets
+
+**Decision Flow:**
+```
+Is skill REQUIRED in JD?
+  YES → Must address (claim, soften, or bridge)
+  NO (nice-to-have) → Only include if natural fit
+    → If candidate has it → Add
+    → If candidate doesn't → Skip entirely, no softening
+```
+
+**Example:**
+```
+JD Required: "Python, SQL, AWS, ETL pipelines"
+JD Nice-to-have: "Kafka, Kubernetes, ML experience"
+
+Candidate has: Python, SQL, Azure, ETL, Docker, ML coursework
+
+Action:
+- Python, SQL, ETL → Claim fully (required + have)
+- AWS → Soften to "Cloud platforms (Azure, AWS concepts)" (required + partial)
+- Kafka → Skip (nice-to-have + don't have)
+- Kubernetes → Skip (nice-to-have + don't have, Docker not close enough)
+- ML → Add briefly (nice-to-have + have coursework)
+```
+
+---
+
+### 4. SKILL-TO-BULLET ALIGNMENT (CRITICAL - DO NOT SKIP)
+
+**THE PROBLEM:** Adding skills to the Skills section without evidence in Experience bullets destroys credibility.
+
+**THE RULE:** Every skill added to the Skills section MUST appear in at least one Experience or Project bullet.
+
+#### Process:
+1. Identify JD-required skills not currently in resume
+2. Check if candidate's existing work could have involved that skill (even tangentially)
+3. If YES → Weave the skill into an existing bullet naturally
+4. If NO → Do NOT add the skill to the Skills section
+
+#### Skill Integration Matrix:
+For each new skill added, map it to a bullet:
+
+| Skill to Add | Inject Into Bullet About | Natural Phrasing |
+|--------------|--------------------------|------------------|
+| Streaming | Existing pipeline work | "batch and streaming pipelines" |
+| Unstructured Data | API/JSON processing | "structured and semi-structured data sources" |
+| Shell Scripting | Automation/scripts | "Python and shell scripts for automation" |
+| CI/CD (Jenkins) | Deployment work | "CI/CD workflows using GitHub Actions and Jenkins" |
+| AWS | Cloud work (if any AWS touched) | "Azure and AWS cloud infrastructure" |
+| Data Governance | Data quality work | "data quality and governance controls" |
+
+#### Integration Techniques:
+1. **Append to existing tool list:** "using Python, SQL, and shell scripts"
+2. **Broaden scope:** "batch pipelines" → "batch and near-real-time pipelines"
+3. **Add data type:** "processed records" → "processed structured and semi-structured records"
+4. **Extend platform:** "deployed on Azure" → "deployed on Azure with AWS S3 integration"
+
+#### DO NOT:
+- Add a skill to Skills section without bullet evidence
+- Create fake bullets to support skills
+- Force skills that don't fit the candidate's actual work
+
+#### Validation Check (Run Before Output):
+```
+For each skill in Skills section:
+  - Search Experience bullets for skill mention
+  - If not found → Either add to a bullet OR remove from Skills
+  - No orphan skills allowed
+```
+
+---
+
+### 5. FRONT-LOAD VALUE + METRICS
 
 #### First 5-7 Words Rule:
 The first 5-7 words of every bullet must contain:
@@ -112,7 +303,7 @@ Recruiters scan numbers first. Put them where eyes land.
 
 ---
 
-### 5. BULLET REORDERING (Critical)
+### 6. BULLET REORDERING (Critical)
 
 Don't keep bullets in chronological order. Keep them in RELEVANCE order.
 
@@ -134,26 +325,27 @@ Same facts. Much stronger signal.
 
 ---
 
-### 6. DOMAIN BRIDGING (The "Complexity Pivot")
+### 7. DOMAIN BRIDGING (The "Complexity Pivot")
 
 If the JD requires a domain the candidate lacks, do NOT fabricate experience. Reframe existing experience to highlight *attributes* the JD cares about.
 
 #### Domain Mapping:
-- **Healthcare** → Emphasize: "PII security," "HIPAA-style compliance," "data privacy," "sensitive data handling," "regulated data environments"
-- **Finance** → Emphasize: "high-volume transactions," "audit trails," "decimal precision," "regulatory reporting," "reconciliation"
-- **Startups** → Emphasize: "rapid iteration," "scaling from zero," "agile deployment," "wearing multiple hats," "ambiguity tolerance"
+- **Insurance/Financial Services** → Emphasize: "regulated data environments," "audit trails," "compliance controls," "data governance," "sensitive customer data," "SLA-driven pipelines," "production-grade reliability"
+- **Healthcare** → Emphasize: "PII security," "HIPAA-style compliance," "data privacy," "sensitive data handling"
+- **Finance** → Emphasize: "high-volume transactions," "audit trails," "decimal precision," "regulatory reporting"
+- **Startups** → Emphasize: "rapid iteration," "scaling from zero," "agile deployment," "ambiguity tolerance"
 - **Enterprise** → Emphasize: "cross-functional collaboration," "stakeholder management," "production-grade systems," "SLA compliance"
 
 #### Example:
-- JD asks: "Healthcare data experience"
-- Resume has: "Marketing / CRM data"
-- Rewrite: "Processed high-volume, regulated enterprise data from Salesforce and HubSpot, applying strict data quality checks and validation—skills directly transferable to healthcare data environments"
+- JD asks: "Insurance/financial services industry knowledge"
+- Resume has: "Marketing / CRM / SaaS data"
+- Rewrite: "Processed high-volume, regulated enterprise data with strict data governance controls and compliance requirements—patterns directly applicable to insurance and financial services environments"
 
 This shows pattern familiarity, not false experience.
 
 ---
 
-### 7. POWER VERB ENFORCEMENT
+### 8. POWER VERB ENFORCEMENT
 
 #### Banned Junior Language (DELETE immediately):
 - "Responsible for" → Replace with ownership verb
@@ -172,7 +364,7 @@ This shows pattern familiarity, not false experience.
 
 ---
 
-### 8. SHOW PROGRESSION (Tell a Story)
+### 9. SHOW PROGRESSION (Tell a Story)
 
 Top resumes show career progression:
 - From execution → ownership
@@ -186,7 +378,34 @@ Make this visible across roles:
 
 ---
 
-### 9. HUMAN READABILITY CHECK
+### 10. JD SKILL COVERAGE CHECKLIST
+
+Before finalizing, verify coverage of ALL JD requirements:
+
+#### Must-Have Skills (from JD):
+For each skill listed as required in JD:
+- [ ] Skill appears in Skills section
+- [ ] Skill appears in at least one bullet
+- [ ] If candidate lacks skill entirely → Use Complexity Pivot or omit
+
+#### Nice-to-Have Skills (from JD):
+- Include if candidate has related experience
+- Don't stretch to include if no reasonable connection
+
+#### Coverage Report (Internal Check):
+```
+JD Requirement: "Experience with ETL processes"
+  → Skills section: ✓ "ETL/ELT Design"
+  → Bullet evidence: ✓ "Architected scalable ELT pipelines..."
+
+JD Requirement: "AWS experience"
+  → Skills section: ? "AWS concepts"
+  → Bullet evidence: ? [MISSING - either add to bullet or remove/soften in skills]
+```
+
+---
+
+### 11. HUMAN READABILITY CHECK
 
 - Do NOT jam keywords if they break sentence structure
 - The sentence must flow logically for a human reader
@@ -196,7 +415,7 @@ Make this visible across roles:
 
 ---
 
-### 10. WHAT YOU MUST KEEP INTACT
+### 12. WHAT YOU MUST KEEP INTACT
 - All metrics, numbers, percentages (move them forward, don't change them)
 - All company names, job titles, dates, locations
 - All core tools/technologies (reorder and expand, don't remove)
@@ -204,12 +423,269 @@ Make this visible across roles:
 - certifications section (do not touch)
 - education section (do not touch)
 
-### 11. WHAT YOU MUST NOT DO
+### 13. WHAT YOU MUST NOT DO
 - Do NOT add tools/technologies the candidate has never used
 - Do NOT fabricate metrics or achievements
-- Do NOT exceed word count of original fields
+- Do NOT exceed word count of original fields significantly
 - Do NOT claim domain experience that doesn't exist (use Complexity Pivot)
 - Do NOT create awkward sentences just to stuff keywords
+- Do NOT add skills to Skills section without corresponding bullet evidence
+
+---
+
+### 14. FINAL VALIDATION CHECKLIST
+
+Before outputting the tailored resume, verify:
+
+**Summary:**
+```
+[ ] Summary mirrors top 3 JD keywords/phrases
+[ ] Summary front-loads JD's #1 priority
+[ ] Summary is under 60 words
+[ ] No generic fluff language
+```
+
+**Skills Section:**
+```
+[ ] Every skill in Skills section has evidence in Experience OR Projects
+[ ] No orphan skills (skills without proof)
+[ ] Skills ordered by JD priority (most important first)
+[ ] Related tools used instead of fabricated tools (per mapping table)
+[ ] Softened language used appropriately ("concepts" vs full claim)
+[ ] Nice-to-have skills only included if naturally fit
+```
+
+**Experience Section:**
+```
+[ ] Top 5 JD requirements addressed in first 2 bullets of most recent role
+[ ] Bullets ordered by JD relevance, not chronology
+[ ] Metrics front-loaded in bullets
+[ ] JD terminology mirrored (not synonyms)
+[ ] No fabricated tools or achievements
+[ ] Power verbs used (no "responsible for" or "helped")
+```
+
+**Projects Section:**
+```
+[ ] Projects absorb skill gaps not covered in Experience
+[ ] Tech stack limited to 6-8 tools per project
+[ ] Description limited to ~40-50 words per project
+[ ] No orphan tech (tools in stack appear in description)
+[ ] Maximum 2-3 projects total
+```
+
+**Skill Coverage Matrix:**
+```
+[ ] Every REQUIRED JD skill is covered somewhere (Skills + Evidence)
+[ ] NICE-TO-HAVE skills only included if genuine experience
+[ ] Domain bridging applied if industry mismatch
+[ ] No tool fabrication anywhere
+```
+
+**Human Readability:**
+```
+[ ] Sentences flow naturally (no keyword stuffing)
+[ ] No "keyword soup" in skills
+[ ] Would pass interview questions on every claimed skill
+```
+
+---
+
+### 15. PROJECT TAILORING (Critical for Skill Gaps)
+
+Projects are your **skill gap safety net**. When Experience bullets can't naturally absorb a JD skill, Projects MUST carry that weight.
+
+#### The Role of Projects:
+1. **Demonstrate skills you couldn't show at work** (personal projects, coursework)
+2. **Show recent/current technical relevance** (newer tools, cloud platforms)
+3. **Fill JD requirement gaps** that Experience can't cover
+4. **Prove hands-on ability** beyond "concepts" or "familiarity"
+
+#### Project Tailoring Process:
+
+**Step 1: Identify Uncovered JD Skills**
+After tailoring Experience, list JD requirements still missing bullet evidence:
+```
+Example Gap Analysis:
+- AWS hands-on → Not in Experience (only Azure)
+- Streaming pipelines → Not in Experience (only batch)
+- Jenkins CI/CD → Not in Experience (only GitHub Actions)
+- Unstructured data → Not in Experience
+```
+
+**Step 2: Map Gaps to Existing Projects**
+Check if candidate's projects can absorb these skills truthfully:
+
+| Missing Skill | Project That Could Include It | How to Integrate |
+|---------------|-------------------------------|------------------|
+| AWS | Any cloud project | Add S3/Lambda if used, or reframe as multi-cloud |
+| Streaming | Airflow/pipeline project | "batch and event-driven pipelines" |
+| Jenkins | Any CI/CD project | "CI/CD using GitHub Actions and Jenkins pipelines" |
+| Unstructured data | API/data platform project | "ingesting structured and unstructured data sources" |
+
+**Step 3: Rewrite Project Bullets**
+
+#### Project Bullet Formula:
+**[Action Verb] + [System/Platform] + [JD-Aligned Tech Stack] + [Scale/Scope] + [Impact/Outcome]**
+
+**Before (generic):**
+```
+Marketing Analytics Platform — Azure, Microsoft Fabric, dbt, SQL, FastAPI
+Built end-to-end data platform on Microsoft Fabric with Lakehouse architecture; designed bronze/silver/gold medallion layers with FastAPI caching layer reducing warehouse query load by 70%
+```
+
+**After (JD-aligned for Nationwide role):**
+```
+Data Lakehouse Platform — Azure, Microsoft Fabric, dbt, SQL, FastAPI, AWS S3
+Architected end-to-end Data Lakehouse with medallion layers (bronze/silver/gold) supporting batch and streaming data products; implemented data governance controls and API integrations reducing query load by 70%
+```
+
+**What changed:**
+- Added "Data Lakehouse" (exact JD term)
+- Added "AWS S3" to tech stack (if true)
+- Added "streaming" (JD requirement)
+- Added "data products" (JD terminology)
+- Added "data governance controls" (JD requirement)
+
+#### Project Tech Stack Rules:
+
+1. **Reorder tech stack by JD priority**
+   - JD emphasizes AWS → Move AWS-related tools first
+   - JD emphasizes Python → Lead with Python
+
+2. **Expand tech stack with JD tools (if truthfully used)**
+   - Original: "Python, SQL"
+   - Expanded: "Python (Pandas, automation), SQL, Shell Scripting"
+
+3. **Add deployment/infrastructure details**
+   - Original: "Deployed on GKE"
+   - Expanded: "Deployed on GKE with Docker containers and CI/CD automation"
+
+#### Project Description Integration Techniques:
+
+**Technique 1: Broaden Data Types**
+- Before: "processing records"
+- After: "processing structured and semi-structured data from APIs and event streams"
+
+**Technique 2: Add Pipeline Types**
+- Before: "batch pipelines"
+- After: "batch and near-real-time pipelines"
+
+**Technique 3: Include Governance/Quality**
+- Before: "built data platform"
+- After: "built data platform with data quality monitoring and governance controls"
+
+**Technique 4: Add Security/Compliance**
+- Before: "processed customer data"
+- After: "processed sensitive customer data with secure access management and PII controls"
+
+**Technique 5: Include CI/CD Details**
+- Before: "deployed pipelines"
+- After: "deployed pipelines using CI/CD workflows with automated testing"
+
+**Technique 6: Add Business Context**
+- Before: "reduced query time"
+- After: "reduced query time, enabling real-time business intelligence for stakeholders"
+
+#### Project Validation Checklist:
+
+```
+For each JD-required skill NOT in Experience bullets:
+  [ ] Check if any Project used this skill (even partially)
+  [ ] If YES → Add skill to Project tech stack AND description
+  [ ] If NO → Do NOT add skill anywhere (no fabrication)
+
+For each Project:
+  [ ] Tech stack reordered by JD priority
+  [ ] Description uses JD terminology (Mirror Technique)
+  [ ] At least one JD gap skill is covered (if truthful)
+  [ ] Metrics/scale included where possible
+  [ ] No orphan tech (tools in stack must appear in description)
+```
+
+#### Example: Full Project Tailoring
+
+**JD Requirements Still Missing After Experience Tailoring:**
+- AWS experience
+- Streaming pipelines
+- Data governance
+- Jenkins/CI/CD
+
+**Original Project:**
+```
+Batch Pipeline Platform — Airflow, Python, BigQuery, GKE, Docker
+Developed Airflow DAGs processing 1M+ records with retry logic and SLA monitoring; deployed on GKE with autoscaling; BigQuery partitioning reduced query costs by 35%
+```
+
+**Tailored Project:**
+```
+Scalable Data Pipeline Platform — Airflow, Python, BigQuery, AWS S3, GKE, Docker, Jenkins
+Engineered Airflow DAGs processing 1M+ batch and streaming records with retry logic, SLA monitoring, and data quality validation; deployed on GKE with CI/CD automation using Jenkins; implemented partitioning and data governance controls reducing costs by 35%
+```
+
+**Skills Now Covered:**
+- ✓ AWS S3 (in tech stack + can mention in description if used for storage)
+- ✓ Streaming (added "batch and streaming")
+- ✓ Data governance ("data governance controls")
+- ✓ Jenkins ("CI/CD automation using Jenkins")
+- ✓ Data quality ("data quality validation")
+
+#### When to Add a New Project:
+
+Only if:
+1. Candidate has a real project not on resume that fills critical JD gaps
+2. The project demonstrates hands-on experience (not just coursework theory)
+3. Adding it doesn't make Projects section too long (max 2-3 projects)
+
+Do NOT:
+- Invent projects
+- Add projects with tools never actually used
+- List every course project (pick most relevant)
+
+#### Project Length Limits:
+
+- **Tech stack line:** Maximum 6-8 tools (prioritize JD-relevant ones)
+- **Description:** Maximum 2 sentences or ~40-50 words
+- **Total projects:** Maximum 2-3 projects on resume
+
+If trying to cover too many skill gaps in one project, split across multiple projects or accept that some nice-to-have skills won't be covered.
+
+**Overstuffed (BAD):**
+```
+Data Platform — Azure, AWS, GCP, Snowflake, BigQuery, Databricks, Kafka, Airflow, dbt, Python, SQL, Docker, Kubernetes, Jenkins, Terraform
+Built end-to-end multi-cloud data lakehouse with medallion architecture supporting batch and streaming ingestion from structured, semi-structured, and unstructured sources with real-time CDC, implemented comprehensive data governance, quality monitoring, lineage tracking, PII masking, RBAC, CI/CD automation, infrastructure-as-code, containerized deployment, and auto-scaling...
+```
+
+**Balanced (GOOD):**
+```
+Data Lakehouse Platform — Azure, Databricks, dbt, Python, Airflow
+Architected medallion-layer data platform processing batch and event-driven data with governance controls; reduced query load by 70% through optimized caching and materialization strategies.
+```
+
+---
+
+### 16. SKILL COVERAGE MATRIX (Final Validation)
+
+Before outputting, create internal mapping:
+
+```
+| JD Requirement | In Skills? | In Experience? | In Projects? | Status |
+|----------------|------------|----------------|--------------|--------|
+| Data Lakehouse | ✓ | ✓ | ✓ | COVERED |
+| AWS | ✓ | ✗ | ✓ | COVERED |
+| Streaming | ✓ | ✗ | ✓ | COVERED |
+| Jenkins CI/CD | ✓ | ✗ | ✓ | COVERED |
+| Python | ✓ | ✓ | ✓ | COVERED |
+| Data Governance | ✓ | ✓ | ✓ | COVERED |
+| ML Concepts | ✓ | ✓ | ✗ | COVERED |
+| Insurance Domain | ✗ | PIVOT | ✗ | BRIDGED |
+```
+
+**Rules:**
+- Every "✓ In Skills" MUST have at least one "✓" in Experience OR Projects
+- If neither Experience nor Projects can cover it → Remove from Skills
+- Use "PIVOT" for domain bridging (no direct experience, but transferable framing)
+- Use "BRIDGED" status when Complexity Pivot is applied
 
 ---
 
@@ -225,12 +701,13 @@ Structure:
 
 ### Cover Letter Rules:
 - Do NOT open with "I am excited to apply..."
-- DO open with relevance: "This role aligns with my experience building scalable analytics systems..."
-- Reference 1-2 exact JD requirements
+- DO open with relevance: "Your need for a Data Engineer to support the Life Data Lakehouse aligns directly with my experience building..."
+- Reference 2-3 exact JD requirements by name
 - Tie them to specific experience with metrics
 - Stay under 3 short paragraphs
-- Use Mirror Technique (match JD terminology)
+- Use Mirror Technique (match JD terminology exactly)
 - Use power verbs, avoid passive language
+- Address any obvious gaps proactively (e.g., "While my cloud experience is primarily Azure, the architectural patterns translate directly to AWS...")
 - If it reads like a resume in paragraph form, it's wrong
 - Do NOT fabricate experience
 
@@ -261,20 +738,24 @@ Extract from job description:
   "location": "Location",
   "work_type": "Remote/Hybrid/Onsite",
   "job_number": "Job ID if available",
-  "min_salary": "Salary Minimum if available",
-  "max_salary": "Salary Maximum if available",
+  "min_salary": "Minimum salary if available",
+  "max_salary": "Maximum salary if available",
   "required_skills": ["skill1", "skill2"],
   "nice_to_have": ["skill1", "skill2"],
   "experience_years": "X+ years",
   "clearance": "Security clearance if mentioned",
-  "url": "Job URL",
-  "posted_date": "if its mentioned today, then calculate the timestamp",
-  "short_description": "small job description in paragraph, around 100 words",
-  "work_type": "fulltime/parttime/contract/w2 etc",
-  "min qualification": "get the points such as ms in computer science or engineering etc"
+  "url": "Job URL if provided",
+  "posted_date": "Date if mentioned, calculate from 'today' if relative",
+  "short_description": "100-word summary of role and responsibilities",
+  "employment_type": "fulltime/parttime/contract/w2/etc",
+  "min_qualification": ["MS in Computer Science", "BS in related field", "etc"],
+  "industry": "Insurance/Finance/Healthcare/Tech/etc",
   "scraped_at": "Timestamp from metadata"
 }
+
+### Job Details Rules:
 - Use null for unavailable fields
-- Extract ALL required skills mentioned
+- Extract ALL required skills mentioned in JD
 - Distinguish between "required" and "nice to have"
+- Capture industry for Domain Bridging
 - Do not change the key names

@@ -1,5 +1,5 @@
 """
-gemini_client.py - Tailor resume, cover letter, LinkedIn message based on job description
+gemini_client.py - Tailor resume, cover letter, custom prompts based on job description
 """
 
 import os
@@ -17,6 +17,7 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL_SCRAPE = os.getenv("GEMINI_MODEL_SCRAPE", "gemini-2.0-flash")
 
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -52,7 +53,7 @@ def load_json_file(path: Path) -> dict:
 def save_json_file(path: Path, data: dict):
     """Save dict as JSON file."""
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  ✓ Saved: {path.name}")
+    print(f"  ✔ Saved: {path.name}")
 
 
 def extract_json_block(text: str, start_marker: str, end_marker: str) -> dict:
@@ -73,10 +74,21 @@ def extract_json_block(text: str, start_marker: str, end_marker: str) -> dict:
         return {}
 
 
-def get_option(metadata: dict, key: str) -> bool:
-    """Safely get option flag from metadata."""
+def extract_text_block(text: str, start_marker: str, end_marker: str) -> str:
+    """Extract plain text from between markers."""
+    pattern = rf"{re.escape(start_marker)}\s*(.*?)\s*{re.escape(end_marker)}"
+    match = re.search(pattern, text, re.DOTALL)
+    
+    if not match:
+        return ""
+    
+    return match.group(1).strip()
+
+
+def get_option(metadata: dict, key: str):
+    """Safely get option from metadata."""
     options = metadata.get("options", {})
-    return options.get(key, False)
+    return options.get(key)
 
 
 # ============================================================
@@ -96,11 +108,11 @@ def tailor_resume():
     metadata = load_json_file(DOWNLOADED_DIR / "metadata.json")
     if not metadata:
         print("  ✗ metadata.json not found")
-        return
-    print("  ✓ metadata.json")
+        return {"custom_output": None}
+    print("  ✔ metadata.json")
     
     job_description = (DOWNLOADED_DIR / "cleaned.txt").read_text(encoding="utf-8")
-    print("  ✓ cleaned.txt")
+    print("  ✔ cleaned.txt")
     
     # Get template filename from metadata
     resume_file = metadata.get("options", {}).get("resumeFile", "")
@@ -109,18 +121,37 @@ def tailor_resume():
     
     if template_name:
         template_resume = load_json_file(TEMPLATES_DIR / f"{template_name}.json")
-        print(f"  {'✓' if template_resume else '✗'} {template_name}.json (template)")
+        print(f"  {'✔' if template_resume else '✗'} {template_name}.json (template)")
     
     # Determine what to generate
     generate_resume = get_option(metadata, "resume")
     generate_cover = get_option(metadata, "coverLetter")
-    generate_linkedin = get_option(metadata, "linkedin")
+    custom_prompt = get_option(metadata, "customPrompt")
     
     print(f"\nGeneration flags:")
     print(f"  Resume: {generate_resume}")
     print(f"  Cover Letter: {generate_cover}")
-    print(f"  LinkedIn: {generate_linkedin}")
+    print(f"  Custom Prompt: {bool(custom_prompt)}")
     print(f"  Job Details: Always")
+    
+    # Select model based on resume flag
+    selected_model = GEMINI_MODEL if generate_resume else GEMINI_MODEL_SCRAPE
+    print(f"\nUsing model: {selected_model}")
+    
+    # Build custom prompt section
+    custom_prompt_section = ""
+    if custom_prompt:
+        custom_prompt_section = f"""
+## CUSTOM PROMPT FROM USER
+{custom_prompt}
+
+## CUSTOM OUTPUT INSTRUCTIONS
+Respond to the user's custom prompt. Be concise and direct. Do only what is asked, no extra explanations. Do not use dashes, bullet points, or bold formatting. Plain text only.
+
+===CUSTOM_OUTPUT_START===
+(your response here)
+===CUSTOM_OUTPUT_END===
+"""
     
     # Build prompt
     prompt = f"""
@@ -139,8 +170,8 @@ def tailor_resume():
 ## GENERATION FLAGS
 - Generate tailored resume: {generate_resume}
 - Generate cover letter: {generate_cover}
-- Generate LinkedIn message: {generate_linkedin}
 - Generate job details: True
+{custom_prompt_section}
 
 ## INSTRUCTIONS
 1. Always extract job details
@@ -148,17 +179,19 @@ def tailor_resume():
 3. If a generation flag is True, generate the full content
 4. For tailored resume: maintain EXACT same structure as template, only modify allowed sections
 5. Respect word limits - do not exceed original word count for any field
+6. For LinkedIn message section, always output empty JSON {{}}
+{"7. Generate custom output response based on the custom prompt provided" if custom_prompt else ""}
 
-Generate all four outputs now.
+Generate all outputs now.
 """
     
-    # Call Gemini
+    # Call Gemini (SINGLE CALL)
     print("\nCalling Gemini API...")
     
     system_prompt = load_prompt("tailor_resume")
     
     model = genai.GenerativeModel(
-        model_name=GEMINI_MODEL,
+        model_name=selected_model,
         system_instruction=system_prompt
     )
     
@@ -171,7 +204,7 @@ Generate all four outputs now.
     job_details = extract_json_block(text, "===JOB_DETAILS_START===", "===JOB_DETAILS_END===")
     tailored_resume = extract_json_block(text, "===TAILORED_RESUME_START===", "===TAILORED_RESUME_END===")
     tailored_cover = extract_json_block(text, "===TAILORED_COVER_START===", "===TAILORED_COVER_END===")
-    linkedin_message = extract_json_block(text, "===LINKEDIN_MESSAGE_START===", "===LINKEDIN_MESSAGE_END===")
+    custom_output_text = extract_text_block(text, "===CUSTOM_OUTPUT_START===", "===CUSTOM_OUTPUT_END===")
     
     # Save outputs
     print("\nSaving outputs...")
@@ -179,11 +212,21 @@ Generate all four outputs now.
     save_json_file(DOWNLOADED_DIR / "job_details.json", job_details)
     save_json_file(DOWNLOADED_DIR / "tailored_resume.json", tailored_resume)
     save_json_file(DOWNLOADED_DIR / "tailored_cover.json", tailored_cover)
-    save_json_file(DOWNLOADED_DIR / "linkedin_message.json", linkedin_message)
+    
+    # Save custom output if present
+    if custom_output_text:
+        custom_output_data = {
+            "prompt": custom_prompt,
+            "response": custom_output_text,
+            "timestamp": metadata.get("scraped_at", "")
+        }
+        save_json_file(DOWNLOADED_DIR / "custom_output.json", custom_output_data)
     
     print("\n" + "="*50)
     print("Complete!")
     print("="*50)
+    
+    return {"custom_output": custom_output_text if custom_output_text else None}
 
 
 # ============================================================

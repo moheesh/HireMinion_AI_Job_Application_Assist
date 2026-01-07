@@ -1,12 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "Resume Tailor",
+  "name": "HireMinion",
   "version": "1.0.0",
-  "description": "Scrape job postings and tailor resume",
+  "description": "Just like the minion but AI-powered for job assist",
   "permissions": ["activeTab", "scripting", "tabs"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Resume Tailor"
+    "default_title": "HireMinion",
+    "default_icon": {
+      "16": "icon.png",
+      "32": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   },
   "background": {
     "service_worker": "background.js"

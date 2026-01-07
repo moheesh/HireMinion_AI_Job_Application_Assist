@@ -2,40 +2,485 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Resume Tailor</title>
+  <title>HireMinion</title>
   <style>
-    body { width: 260px; padding: 16px; font-family: -apple-system, sans-serif; font-size: 14px; }
-    button { width: 100%; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 8px; background: #667eea; }
-    button:hover { background: #5a6fd6; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    .checkbox-group { margin-bottom: 12px; }
-    .checkbox-group label { display: block; margin: 6px 0; cursor: pointer; }
-    #status { margin-top: 8px; font-size: 12px; min-height: 20px; }
-    .success { color: green; }
-    .error { color: red; }
-    .info { color: #667eea; }
-    .hidden { display: none; }
-    select { width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
-    #resumeSelect { margin-top: 8px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 400px;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100%;
+    }
+    
+    .container {
+      background: #fff;
+      margin: 12px;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #f7b731 0%, #f5a623 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(247, 183, 49, 0.4);
+      overflow: hidden;
+    }
+    
+    .logo img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+    
+    .header-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+    
+    .header-text p {
+      font-size: 11px;
+      color: #888;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-group label.title {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .required::after {
+      content: ' *';
+      color: #ef4444;
+    }
+    
+    /* Select Dropdown */
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      font-size: 14px;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236366f1' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+    
+    select:hover {
+      border-color: #6366f1;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    /* Checkbox Group */
+    .checkbox-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      background: #f5f5f5;
+      border: 1px solid #e5e7eb;
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    .checkbox-group label:hover {
+      border-color: #6366f1;
+      background: #f0f0ff;
+    }
+    
+    .checkbox-group label:has(input:checked) {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-color: transparent;
+      color: #fff;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      display: none;
+    }
+    
+    /* Textarea */
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      transition: all 0.2s ease;
+      background: #fff;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    #customPromptBox {
+      margin-bottom: 16px;
+      min-height: 70px;
+      display: none;
+    }
+    
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 10px 12px;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    #scrapeBtn {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    }
+    
+    #scrapeBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    
+    #storeBtn {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    }
+    
+    #storeBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    #clearBtn {
+      background: #6b7280;
+      flex: 0.6;
+    }
+    
+    #clearBtn:hover {
+      background: #4b5563;
+    }
+    
+    button:disabled {
+      background: #d1d5db !important;
+      box-shadow: none !important;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    /* Progress Container */
+    #progressContainer {
+      display: none;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      background: #f0f0ff;
+      border: 1px solid #e0e0ff;
+      margin-bottom: 16px;
+    }
+    
+    #progressContainer.error {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+    
+    #progressContainer.success {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #e0e0e0;
+      border-top: 2px solid #6366f1;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    #progressText {
+      font-size: 12px;
+      color: #6366f1;
+      font-weight: 600;
+    }
+    
+    #progressContainer.error #progressText {
+      color: #ef4444;
+    }
+    
+    #progressContainer.success #progressText {
+      color: #10b981;
+    }
+    
+    /* Output Section - ENHANCED */
+    .output-section {
+      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .output-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7, #6366f1);
+      background-size: 200% 100%;
+      animation: shimmer 3s linear infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .output-label {
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .output-label-icon {
+      font-size: 14px;
+    }
+    
+    .output-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #6366f1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    
+    #outputBox {
+      width: 100%;
+      min-height: 200px;
+      max-height: 320px;
+      padding: 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      background: rgba(255, 255, 255, 0.05);
+      resize: vertical;
+      line-height: 1.7;
+      color: #e0e0e0;
+    }
+    
+    #outputBox::placeholder {
+      color: #555;
+    }
+    
+    #outputBox:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Scrollbar for output */
+    #outputBox::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #outputBox::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+    
+    #outputBox::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.5);
+      border-radius: 3px;
+    }
+    
+    #outputBox::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.7);
+    }
+    
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div id="controls">
-    <div class="checkbox-group">
-      <label><input type="checkbox" id="chkResume"> Tailor Resume</label>
-      <label><input type="checkbox" id="chkCover"> Tailor Cover Letter</label>
-      <label><input type="checkbox" id="chkLinkedin"> LinkedIn Message</label>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="icon.png" alt="HireMinion">
+      </div>
+      <div class="header-text">
+        <h1>HireMinion</h1>
+        <p>Just like the minion but AI-powered for job assist</p>
+      </div>
     </div>
-    <div id="resumeSelectContainer" class="hidden">
-      <select id="resumeSelect">
-        <option value="">Select a resume...</option>
-      </select>
+    
+    <div id="controls">
+      <div class="form-group">
+        <label class="title required">Resume</label>
+        <select id="resumeSelect">
+          <option value="">Loading resumes...</option>
+        </select>
+      </div>
+
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" id="chkResume">
+          <span>📄 Resume</span>
+        </label>
+        <label>
+          <input type="checkbox" id="chkCover">
+          <span>✉️ Cover Letter</span>
+        </label>
+        <label>
+          <input type="checkbox" id="chkCustomPrompt">
+          <span>💬 Custom Prompt</span>
+        </label>
+      </div>
+      
+      <textarea id="customPromptBox" placeholder="Enter your custom AI instructions..."></textarea>
+
+      <div class="button-group">
+        <button id="scrapeBtn">
+          <span>🔍</span>
+          <span>Scrape</span>
+        </button>
+        <button id="storeBtn">
+          <span>💾</span>
+          <span>Store</span>
+        </button>
+        <button id="clearBtn">
+          <span>🗑️</span>
+          <span>Clear</span>
+        </button>
+      </div>
     </div>
-    <button id="scrapeBtn">🔍 Start Scrape</button>
-    <button id="storeBtn">💾 Store Information</button>
-    <button id="clearBtn">🗑️ Clear All</button>
+
+    <div id="progressContainer">
+      <div class="spinner" id="spinner"></div>
+      <div id="progressText">Processing...</div>
+    </div>
+
+    <div class="output-section">
+      <div class="output-header">
+        <label class="output-label">
+          <span class="output-label-icon">⚡</span>
+          <span>Output Terminal</span>
+        </label>
+        <div class="output-status">
+          <span class="status-dot"></span>
+          <span>Ready</span>
+        </div>
+      </div>
+      <textarea id="outputBox" readonly placeholder="// Results will appear here after processing...&#10;// Select a resume and choose your options above&#10;// Click Scrape to analyze the current job posting"></textarea>
+    </div>
   </div>
-  <div id="status"></div>
+
   <script src="popup.js"></script>
 </body>
 </html>

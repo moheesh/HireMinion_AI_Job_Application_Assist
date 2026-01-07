@@ -30,30 +30,34 @@ class JobStorage:
             return self.valid_columns
         
         try:
-            # Get one row to determine columns, or empty result shows columns
             response = self.client.table("jobs").select("*").limit(1).execute()
             if response.data:
                 self.valid_columns = set(response.data[0].keys())
             else:
-                # Fallback: try inserting empty and parse error, or use known columns
                 self.valid_columns = {
                     "id", "company", "role", "location", "work_type", "job_number",
                     "min_salary", "max_salary", "required_skills", "nice_to_have",
                     "experience_years", "clearance", "url", "posted_date",
                     "short_description", "min_qualification", "scraped_at",
-                    "ingested_at", "machine_id"
+                    "ingested_at", "machine_id", "raw_content"
                 }
         except:
             self.valid_columns = set()
         
         return self.valid_columns
     
+    def _load_raw_content(self) -> str:
+        """Load raw content from cleaned.txt file."""
+        cleaned_path = DOWNLOADED_DIR / "cleaned.txt"
+        if cleaned_path.exists():
+            return cleaned_path.read_text(encoding="utf-8")
+        return ""
+    
     def load_json(self, json_path: str = "downloaded/job_details.json") -> list[dict]:
         """Load job details from JSON file."""
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         
-        # Handle both single dict and list of dicts
         if isinstance(data, dict):
             data = [data]
         
@@ -63,20 +67,18 @@ class JobStorage:
         """Filter jobs to only include valid columns for Supabase."""
         valid_cols = self._get_valid_columns()
         cleaned_data = []
+        raw_content = self._load_raw_content()
         
         for job in jobs:
-            # Filter only valid columns (skip 'id' as it's auto-generated)
             if valid_cols:
                 cleaned_job = {k: v for k, v in job.items() if k in valid_cols and k != "id"}
             else:
-                # If we couldn't get schema, just pass everything and let it fail gracefully
                 cleaned_job = {k: v for k, v in job.items() if k != "id"}
             
-            # Add metadata
             cleaned_job["machine_id"] = self.machine_id
             cleaned_job["ingested_at"] = datetime.now().isoformat()
+            cleaned_job["raw_content"] = raw_content
             
-            # Convert lists to JSON strings for JSONB columns
             for key in ["required_skills", "nice_to_have"]:
                 if key in cleaned_job and isinstance(cleaned_job[key], list):
                     cleaned_job[key] = json.dumps(cleaned_job[key])
@@ -86,18 +88,17 @@ class JobStorage:
         return cleaned_data
     
     def store(self, json_path: str = "downloaded/job_details.json") -> dict:
-        """Store jobs to Supabase with upsert (insert or update on conflict)."""
+        """Store jobs to Supabase with upsert."""
         try:
             raw_jobs = self.load_json(json_path)
             jobs = self._prepare_for_supabase(raw_jobs)
             
-            # Upsert - inserts new rows, updates existing ones based on 'url'
             response = self.client.table("jobs").upsert(
                 jobs, 
                 on_conflict="url"
             ).execute()
             
-            print(f"  ✓ Stored {len(jobs)} jobs to Supabase")
+            print(f"  ✔ Stored {len(jobs)} jobs to Supabase")
             return {"success": True, "count": len(jobs)}
         except Exception:
             print(f"  ✗ Failed to store to Supabase")
@@ -135,6 +136,51 @@ class JobStorage:
         response = self.client.table("jobs").delete().eq("url", url).execute()
         return response
     
+    def mark_applied(self, url: str) -> dict:
+        """
+        Mark a job as applied in the local archive.
+        Returns not_found=True if URL doesn't exist in archive.
+        """
+        try:
+            RESUME_ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+            archive_file = RESUME_ARCHIVE_DIR / "archive.json"
+            
+            # Load existing archive
+            if not archive_file.exists():
+                return {"success": False, "not_found": True, "error": "No archive exists"}
+            
+            # Handle empty or invalid file
+            content = archive_file.read_text(encoding="utf-8").strip()
+            if not content:
+                return {"success": False, "not_found": True, "error": "Archive is empty"}
+            
+            try:
+                archive = json.loads(content)
+            except json.JSONDecodeError:
+                return {"success": False, "not_found": True, "error": "Archive is corrupted"}
+            
+            # Check if URL exists
+            if url not in archive:
+                return {"success": False, "not_found": True, "error": "URL not in archive"}
+            
+            # Mark as applied
+            archive[url]["applied"] = True
+            archive[url]["applied_at"] = datetime.now().isoformat()
+            
+            # Save archive
+            with open(archive_file, "w", encoding="utf-8") as f:
+                json.dump(archive, f, indent=2)
+            
+            company = archive[url].get("job_details", {}).get("company", "Unknown")
+            role = archive[url].get("job_details", {}).get("role", "Unknown")
+            
+            print(f"  ✔ Marked as applied: {company} | {role}")
+            return {"success": True, "company": company, "role": role}
+            
+        except Exception as e:
+            print(f"  ✗ Failed to mark as applied: {e}")
+            return {"success": False, "error": str(e)}
+    
     def archive_resume(
         self,
         job_details_path: str = None,
@@ -143,63 +189,64 @@ class JobStorage:
         """
         Archive job details + tailored resume to single archive.json file.
         Only appends if URL doesn't already exist.
-        
-        Returns:
-            dict with status info
         """
         try:
-            # Default paths
-            job_details_path = job_details_path or DOWNLOADED_DIR / "job_details.json"
-            tailored_resume_path = tailored_resume_path or DOWNLOADED_DIR / "tailored_resume.json"
+            job_details_path = Path(job_details_path) if job_details_path else DOWNLOADED_DIR / "job_details.json"
+            tailored_resume_path = Path(tailored_resume_path) if tailored_resume_path else DOWNLOADED_DIR / "tailored_resume.json"
             
-            # Ensure archive folder exists
             RESUME_ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
             archive_file = RESUME_ARCHIVE_DIR / "archive.json"
             
-            # Load existing archive or create empty dict
+            # Load or create archive
             if archive_file.exists():
-                with open(archive_file, "r", encoding="utf-8") as f:
-                    archive = json.load(f)
+                content = archive_file.read_text(encoding="utf-8").strip()
+                if content:
+                    try:
+                        archive = json.loads(content)
+                    except json.JSONDecodeError:
+                        archive = {}
+                else:
+                    archive = {}
             else:
                 archive = {}
             
-            # Load job details
             with open(job_details_path, "r", encoding="utf-8") as f:
                 job_details = json.load(f)
             
             url = job_details.get("url")
             if not url:
                 print("  ✗ No URL found, skipping local archive")
-                return {"success": False}
+                return {"success": False, "error": "No URL in job details"}
             
-            # Check if URL already exists
             if url in archive:
-                print(f"  ✓ Already archived locally")
+                print(f"  ✔ Already archived locally")
                 return {"success": True, "already_exists": True, "url": url}
             
-            # Load tailored resume
             tailored_resume = {}
-            if Path(tailored_resume_path).exists():
+            if tailored_resume_path.exists():
                 with open(tailored_resume_path, "r", encoding="utf-8") as f:
                     tailored_resume = json.load(f)
             
-            # Add to archive (URL is the key)
+            # Load raw content
+            raw_content = self._load_raw_content()
+            
             archive[url] = {
                 "archived_at": datetime.now().isoformat(),
                 "machine_id": self.machine_id,
                 "job_details": job_details,
-                "tailored_resume": tailored_resume
+                "tailored_resume": tailored_resume,
+                "raw_content": raw_content,
+                "applied": False
             }
             
-            # Save archive
             with open(archive_file, "w", encoding="utf-8") as f:
                 json.dump(archive, f, indent=2)
             
-            print(f"  ✓ Archived locally: {job_details.get('company')} | {job_details.get('role')}")
+            print(f"  ✔ Archived locally: {job_details.get('company')} | {job_details.get('role')}")
             return {"success": True, "already_exists": False, "url": url}
-        except Exception:
-            print(f"  ✗ Failed to archive locally")
-            return {"success": False}
+        except Exception as e:
+            print(f"  ✗ Failed to archive locally: {e}")
+            return {"success": False, "error": str(e)}
     
     def list_archives(self) -> list[dict]:
         """List all archived resumes with summary info."""
@@ -215,7 +262,9 @@ class JobStorage:
                 "url": url,
                 "company": data.get("job_details", {}).get("company"),
                 "role": data.get("job_details", {}).get("role"),
-                "archived_at": data.get("archived_at")
+                "archived_at": data.get("archived_at"),
+                "applied": data.get("applied", False),
+                "applied_at": data.get("applied_at")
             }
             for url, data in archive.items()
         ]
@@ -227,20 +276,27 @@ class JobStorage:
             return 0
         with open(archive_file, "r", encoding="utf-8") as f:
             return len(json.load(f))
+    
+    def applied_count(self) -> int:
+        """Get count of applied jobs."""
+        archive_file = RESUME_ARCHIVE_DIR / "archive.json"
+        if not archive_file.exists():
+            return 0
+        with open(archive_file, "r", encoding="utf-8") as f:
+            archive = json.load(f)
+        return sum(1 for data in archive.values() if data.get("applied", False))
 
 
 if __name__ == "__main__":
     storage = JobStorage()
     
-    # Store jobs from JSON to Supabase
     storage.store("downloaded/job_details.json")
     
-    # Archive resume locally (only if not already archived)
     storage.archive_resume(
         job_details_path="downloaded/job_details.json",
         tailored_resume_path="downloaded/tailored_resume.json"
     )
     
-    # View counts
     print(f"\nTotal jobs in Supabase: {storage.count()}")
     print(f"Total archived resumes: {storage.archive_count()}")
+    print(f"Total applied: {storage.applied_count()}")
