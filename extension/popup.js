@@ -8,12 +8,38 @@ const spinner = document.getElementById('spinner');
 
 let resumes = [];
 
+// === PERSISTENCE ===
+function saveState() {
+  chrome.storage.local.set({
+    ui: {
+      output: outputBox.value,
+      selectedResume: resumeSelect.value,
+      customPromptText: customPromptBox.value
+    }
+  });
+}
+
+async function loadState() {
+  const { ui } = await chrome.storage.local.get('ui');
+  if (!ui) return;
+  
+  outputBox.value = ui.output || '';
+  customPromptBox.value = ui.customPromptText || '';
+  
+  if (ui.selectedResume) {
+    resumeSelect.value = ui.selectedResume;
+  }
+}
+// === END PERSISTENCE ===
+
 function setOutput(text) {
   outputBox.value = text;
+  saveState();
 }
 
 function clearOutput() {
   outputBox.value = '';
+  saveState();
 }
 
 function showProgress(message = 'Processing...') {
@@ -49,6 +75,10 @@ function setButtons(disabled) {
 chkCustomPrompt.addEventListener('change', () => {
   customPromptBox.style.display = chkCustomPrompt.checked ? 'block' : 'none';
 });
+
+// Save on changes
+resumeSelect.addEventListener('change', saveState);
+customPromptBox.addEventListener('input', saveState);
 
 // Fetch available resumes on load
 async function loadResumes() {
@@ -203,6 +233,9 @@ document.getElementById('clearBtn').addEventListener('click', async () => {
     if (data.success) {
       showSuccess('Cleared all files');
       clearOutput();
+      resumeSelect.value = '';
+      customPromptBox.value = '';
+      chrome.storage.local.remove('ui');
     } else {
       showError(data.error);
     }
@@ -213,5 +246,5 @@ document.getElementById('clearBtn').addEventListener('click', async () => {
   setButtons(false);
 });
 
-// Load resumes on popup open
-loadResumes();
+// Load resumes on popup open, then restore state
+loadResumes().then(() => loadState());
