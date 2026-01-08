@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 from dotenv import load_dotenv
 import google.generativeai as genai
+import fitz  # PyMuPDF
 
 # Import compiler functions
 from latex_compiler import compile_to_pdf, escape_json_data, create_jinja_environment, preprocess_data
@@ -114,6 +115,51 @@ def get_json_structure(data: dict, indent: int = 0) -> str:
                 lines.append(f"{spacing}{k}: (string)")
     
     return "\n".join(lines)
+
+
+def extract_text_from_pdf(pdf_path: Path) -> str:
+    """Extract text and hyperlinks from PDF using PyMuPDF."""
+    try:
+        doc = fitz.open(pdf_path)
+        text_parts = []
+        all_links = []
+        
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            
+            # Extract text
+            text = page.get_text("text")
+            text_parts.append(f"--- Page {page_num + 1} ---\n{text}")
+            
+            # Extract hyperlinks
+            links = page.get_links()
+            for link in links:
+                if link.get("uri"):
+                    uri = link["uri"]
+                    # Get the text associated with this link area
+                    rect = link.get("from")
+                    if rect:
+                        link_text = page.get_text("text", clip=rect).strip()
+                        if link_text:
+                            all_links.append(f"{link_text}: {uri}")
+                        else:
+                            all_links.append(uri)
+                    else:
+                        all_links.append(uri)
+        
+        doc.close()
+        
+        # Combine text and links
+        result = "\n\n".join(text_parts)
+        
+        if all_links:
+            result += "\n\n--- HYPERLINKS FOUND IN PDF ---\n"
+            result += "\n".join(all_links)
+        
+        return result
+    except Exception as e:
+        print(f"  WARNING: Could not extract text from PDF: {e}")
+        return ""
 
 
 # ============================================================
