@@ -16,11 +16,11 @@ output/*
 !output/.gitkeep
 resume_archive/*
 !resume_archive/.gitkeep
-samples
 
 # Data files (keep folder, ignore contents except .tex templates)
 data/*
 !data/.gitkeep
+working
 
 
 # Templates (keep folder and structure)

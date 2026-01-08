@@ -1,0 +1,59 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=0.4in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,linkcolor=blue!70,urlcolor=blue!70]{hyperref}
+\usepackage{xcolor}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{nosep, leftmargin=15pt, topsep=2pt}
+
+\titleformat{\section}{\bfseries\uppercase}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{6pt}{3pt}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries \VAR{personal_info.name}}\\[2pt]
+\VAR{personal_info.location} \, | \, \VAR{personal_info.email} \, | \, \VAR{personal_info.phone} \, | \, \href{\VAR{personal_info.linkedin_url}}{LinkedIn} \, | \, \href{\VAR{personal_info.github_url}}{GitHub}
+\end{center}
+
+\section{Summary}
+\VAR{summary}
+
+\section{Skills}
+\BLOCK{for category, skill_list in skills_list}\textbf{\VAR{category}:} \VAR{skill_list}\\[1pt]
+\BLOCK{endfor}\textbf{Certification:} \BLOCK{for cert in certifications}\VAR{cert.name} (\href{\VAR{cert.url}}{\VAR{cert.code}})\BLOCK{if not loop.last}, \BLOCK{endif}\BLOCK{endfor}
+
+\section{Experience}
+
+\BLOCK{for job in experience}
+\textbf{\VAR{job.title}} \hfill \VAR{job.start_date} -- \VAR{job.end_date}\\
+\textit{\VAR{job.company}} \hfill \textit{\VAR{job.location}}
+\begin{itemize}
+\BLOCK{for bullet in job.bullets}
+\item \VAR{bullet}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{if job.recognition}
+\textit{Recognition: \VAR{job.recognition}}
+\BLOCK{endif}
+\BLOCK{if not loop.last}\vspace{2pt}\BLOCK{endif}
+\BLOCK{endfor}
+
+\section{Projects}
+
+\BLOCK{for project in projects}
+\textbf{\VAR{project.name}} \, | \, \VAR{project.tech_stack}\\
+\VAR{project.description}
+\BLOCK{if not loop.last}\vspace{2pt}\BLOCK{endif}
+\BLOCK{endfor}
+
+\section{Education}
+
+\BLOCK{for edu in education}
+\textbf{\VAR{edu.degree}} \, | \, GPA: \VAR{edu.gpa} \, | \, \VAR{edu.university}, \VAR{edu.location} \hfill \VAR{edu.start_year} -- \VAR{edu.end_year}\BLOCK{if not loop.last}\\[2pt]\BLOCK{endif}
+\BLOCK{endfor}
+
+\end{document}

@@ -1,0 +1,106 @@
+{
+  "personal_info": {
+    "name": "JOHN MICHAEL SMITH",
+    "location": "San Francisco, CA",
+    "email": "johnsmith@gmail.com",
+    "phone": "+1-415-555-1234",
+    "linkedin_url": "https://www.linkedin.com/in/johnsmith/",
+    "github_url": "https://github.com/johnsmith"
+  },
+  "summary": "Senior Data Engineer with 6+ years building scalable ETL pipelines, data warehouses, and analytics platforms. Experience processing billions of records from e-commerce and fintech systems into cloud data lakes. Core stack: Databricks, AWS, Spark, Airflow. AWS Certified Data Engineer Associate.",
+  "skills": {
+    "data_warehousing": "Databricks, Redshift, Snowflake, BigQuery, PostgreSQL",
+    "data_processing": "Apache Spark, Apache Airflow, AWS Glue, Kafka, Pandas",
+    "data_modeling": "Dimensional Modeling, Data Vault 2.0, SCD Type 2, ELT/ETL Design",
+    "programming": "Python, Scala, SQL, Java, Git",
+    "pipeline_engineering": "Incremental Loads, Backfill Strategies, Data Quality Testing, Schema Evolution, Pipeline Monitoring",
+    "source_systems": "Stripe, Shopify, PostgreSQL, REST APIs, Kafka Streams",
+    "cloud_devops": "AWS (S3, Glue, Redshift, Lambda), Databricks, Terraform, Jenkins CI/CD, Looker, Metabase"
+  },
+  "certifications": [
+    {
+      "name": "AWS Certified Data Engineer Associate",
+      "code": "DEA-C01",
+      "url": "https://aws.amazon.com/certification/certified-data-engineer-associate/"
+    },
+    {
+      "name": "Databricks Certified Data Engineer Professional",
+      "code": "DBR-PRO",
+      "url": "https://www.databricks.com/learn/certification/data-engineer-professional"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Senior Data Engineer",
+      "company": "Stripe Inc.",
+      "location": "San Francisco, CA",
+      "start_date": "Mar 2022",
+      "end_date": "Present",
+      "bullets": [
+        "Built real-time ETL pipelines using Spark Structured Streaming processing 5M+ transactions daily from payment APIs into Databricks Lakehouse",
+        "Developed Python backfill framework for 5 years of payment history (2B+ records) using parallel processing; reduced completion time from 3 weeks to 4 days",
+        "Created Great Expectations data quality suite (100+ tests) covering schema validation, business rules, and cross-system reconciliation; data incidents reduced by 85%",
+        "Optimized Spark jobs through broadcast joins, partition tuning, and caching strategies; reduced daily batch runtime from 3 hours to 45 minutes",
+        "Deployed pipelines with Jenkins CI/CD; built Looker dashboards and implemented row-level security for PCI compliance"
+      ]
+    },
+    {
+      "title": "Data Engineer",
+      "company": "Shopify Inc.",
+      "location": "Ottawa, Canada",
+      "start_date": "Jun 2019",
+      "end_date": "Feb 2022",
+      "recognition": "Engineering Excellence Award (2020, 2021)",
+      "bullets": [
+        "Owned ETL pipelines using AWS Glue and Airflow processing 100K+ daily orders from merchant APIs into Redshift warehouse; maintained 99.9% uptime over 3 years",
+        "Built Spark jobs on Databricks for merchant analytics (10M+ records/batch); reduced processing time 60% through dynamic partition pruning",
+        "Designed star schema (5 fact tables, 20 dimensions) consolidating orders, inventory, and merchant data; schema serves 100+ downstream Looker users in production",
+        "Implemented data quality monitoring using Great Expectations: null-rate checks, row-count anomaly detection, freshness SLAs with PagerDuty alerts; reduced escalations by 75%",
+        "Built automated Python reporting pipelines with Slack integration; led technical design reviews for 5 projects with patterns adopted across 6 teams",
+        "Mentored 8 engineers on data modeling and Spark optimization; created runbooks reducing onboarding time by 3 weeks"
+      ]
+    },
+    {
+      "title": "Junior Data Engineer",
+      "company": "Accenture",
+      "location": "Toronto, Canada",
+      "start_date": "Jan 2018",
+      "end_date": "May 2019",
+      "bullets": [
+        "Developed ETL workflows using SSIS and Python processing retail client data into SQL Server data warehouse",
+        "Built automated data validation scripts reducing manual QA effort by 50%",
+        "Created Power BI dashboards for executive reporting; supported 3 client engagements simultaneously"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Real-Time Fraud Detection Platform",
+      "tech_stack": "Kafka, Spark Streaming, Databricks, MLflow, Python",
+      "description": "Built streaming data platform processing 1M+ events/hour with ML-based fraud scoring; reduced fraud losses by 40% through real-time transaction blocking"
+    },
+    {
+      "name": "Data Lake Migration",
+      "tech_stack": "AWS S3, Glue, Athena, Terraform, Python",
+      "description": "Led migration of 50TB legacy data warehouse to AWS data lake; implemented medallion architecture with Glue ETL; reduced storage costs by 60% and query times by 45%"
+    }
+  ],
+  "education": [
+    {
+      "degree": "MS Computer Science",
+      "university": "Stanford University",
+      "location": "Stanford, CA",
+      "gpa": "3.9",
+      "start_year": "2016",
+      "end_year": "2018"
+    },
+    {
+      "degree": "BS Computer Engineering",
+      "university": "University of Toronto",
+      "location": "Toronto, Canada",
+      "gpa": "3.7",
+      "start_year": "2012",
+      "end_year": "2016"
+    }
+  ]
+}
