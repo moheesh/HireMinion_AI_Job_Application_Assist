@@ -245,19 +245,52 @@ def step1_extract_json(pdf_path: Path, sample_json: dict) -> dict:
     print("STEP 1: EXTRACT JSON FROM PDF")
     print("=" * 60)
     
+    # Extract text from PDF using PyMuPDF
+    print("  Extracting text from PDF...")
+    extracted_text = extract_text_from_pdf(pdf_path)
+    
+    if extracted_text:
+        print(f"  ✓ Extracted {len(extracted_text)} characters from PDF")
+    else:
+        print("  ⚠ No text extracted, relying on PDF visual only")
+    
     json_structure = get_json_structure(sample_json)
     
     prompt = f"""You are a precise resume data extractor. 
 
-TASK: Extract ALL resume information from the attached PDF into JSON format.
+TASK: Extract ALL resume information into JSON format.
 
+You have TWO sources of information:
+1. The attached PDF file (for visual layout and verification)
+2. The extracted text below (for accurate text content and hyperlinks)
+
+USE BOTH SOURCES: The extracted text provides accurate content, while the PDF shows the structure and layout.
+
+==============================================================================
+EXTRACTED TEXT FROM PDF:
+==============================================================================
+{extracted_text}
+
+==============================================================================
+HYPERLINK MAPPING (CRITICAL):
+==============================================================================
+- The "HYPERLINKS FOUND IN PDF" section above contains all clickable links
+- Map "LinkedIn: <url>" to personal_info.linkedin_url
+- Map "GitHub: <url>" to personal_info.github_url
+- Map certification links (e.g., "DP-700: <url>") to certifications[].url
+- Use the EXACT URLs from the hyperlinks section - do not guess or modify them
+
+==============================================================================
 STRICT RULES:
+==============================================================================
 1. Use ONLY the keys shown in the schema below - NO NEW KEYS ALLOWED
 2. You MAY omit keys if that data is not present in the PDF
 3. Maintain exact data types (strings, arrays, objects)
 4. Extract ALL information - do not skip any content from the PDF
 5. For arrays, include ALL items found in the PDF
 6. For skills, categorize them exactly as shown in schema structure
+7. Use the extracted text for accurate spelling of names, emails, URLs, etc.
+8. For ALL URL fields, use the exact hyperlinks from the "HYPERLINKS FOUND IN PDF" section
 
 REQUIRED JSON SCHEMA (use these keys ONLY):
 {json_structure}
@@ -268,10 +301,11 @@ SAMPLE JSON FOR REFERENCE:
 ```
 
 INSTRUCTIONS:
-1. Read the entire PDF carefully
+1. Read the extracted text AND verify with the PDF
 2. Map every piece of information to the correct key
-3. Return ONLY valid JSON - no explanations, no markdown, no code blocks
-4. Start with {{ and end with }}
+3. Map ALL hyperlinks to their corresponding URL fields
+4. Return ONLY valid JSON - no explanations, no markdown, no code blocks
+5. Start with {{ and end with }}
 
 OUTPUT FORMAT:
 Return raw JSON only. No ```json blocks. No explanations before or after."""
