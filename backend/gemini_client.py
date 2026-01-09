@@ -1,5 +1,6 @@
 """
 gemini_client.py - Tailor resume, cover letter, custom prompts based on job description
+Updated to use new google-genai SDK
 """
 
 import os
@@ -7,7 +8,8 @@ import json
 import re
 from pathlib import Path
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # ============================================================
 # CONFIGURATION
@@ -17,9 +19,10 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-GEMINI_MODEL_SCRAPE = os.getenv("GEMINI_MODEL_SCRAPE", "gemini-2.0-flash")
+GEMINI_MODEL_SCRAPE = os.getenv("GEMINI_MODEL_SCRAPE", "gemini-2.5-flash")
 
-genai.configure(api_key=GEMINI_API_KEY)
+# Create client
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # Directory structure
 BASE_DIR = Path(__file__).parent.parent
@@ -53,7 +56,7 @@ def load_json_file(path: Path) -> dict:
 def save_json_file(path: Path, data: dict):
     """Save dict as JSON file."""
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  ✔ Saved: {path.name}")
+    print(f"  ✓ Saved: {path.name}")
 
 
 def extract_json_block(text: str, start_marker: str, end_marker: str) -> dict:
@@ -109,10 +112,10 @@ def tailor_resume():
     if not metadata:
         print("  ✗ metadata.json not found")
         return {"custom_output": None}
-    print("  ✔ metadata.json")
+    print("  ✓ metadata.json")
     
     job_description = (DOWNLOADED_DIR / "cleaned.txt").read_text(encoding="utf-8")
-    print("  ✔ cleaned.txt")
+    print("  ✓ cleaned.txt")
     
     # Get template filename from metadata
     resume_file = metadata.get("options", {}).get("resumeFile", "")
@@ -121,7 +124,7 @@ def tailor_resume():
     
     if template_name:
         template_resume = load_json_file(TEMPLATES_DIR / f"{template_name}.json")
-        print(f"  {'✔' if template_resume else '✗'} {template_name}.json (template)")
+        print(f"  {'✓' if template_resume else '✗'} {template_name}.json (template)")
     
     # Determine what to generate
     generate_resume = get_option(metadata, "resume")
@@ -152,6 +155,9 @@ Respond to the user's custom prompt. Be concise and direct. Do only what is aske
 (your response here)
 ===CUSTOM_OUTPUT_END===
 """
+    
+    # Load system prompt
+    system_prompt = load_prompt("tailor_resume")
     
     # Build prompt
     prompt = f"""
@@ -185,17 +191,17 @@ Respond to the user's custom prompt. Be concise and direct. Do only what is aske
 Generate all outputs now.
 """
     
-    # Call Gemini (SINGLE CALL)
+    # Call Gemini (SINGLE CALL) using new SDK
     print("\nCalling Gemini API...")
     
-    system_prompt = load_prompt("tailor_resume")
-    
-    model = genai.GenerativeModel(
-        model_name=selected_model,
-        system_instruction=system_prompt
+    response = client.models.generate_content(
+        model=selected_model,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+        )
     )
     
-    response = model.generate_content(prompt)
     text = response.text
     
     # Extract outputs

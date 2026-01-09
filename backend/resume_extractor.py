@@ -2,6 +2,7 @@
 resume_extractor.py - Extract resume data from PDF using Gemini (Two-Step Approach)
 Step 1: Extract JSON data from PDF
 Step 2: Generate LaTeX template that visually matches PDF with correct placeholders
+Updated to use new google-genai SDK
 """
 
 import os
@@ -9,7 +10,8 @@ import json
 import re
 from pathlib import Path
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import fitz  # PyMuPDF
 
 # Import compiler functions
@@ -31,12 +33,13 @@ TEMPLATES_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 
-genai.configure(api_key=GEMINI_API_KEY)
+# Create client
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 # ============================================================
@@ -310,11 +313,15 @@ INSTRUCTIONS:
 OUTPUT FORMAT:
 Return raw JSON only. No ```json blocks. No explanations before or after."""
 
-    model = genai.GenerativeModel(GEMINI_MODEL)
-    pdf_file = genai.upload_file(pdf_path, mime_type="application/pdf")
+    # Upload PDF file
+    print("  Uploading PDF to Gemini...")
+    pdf_file = client.files.upload(file=pdf_path)
     
     print("  Calling Gemini API...")
-    response = model.generate_content([pdf_file, prompt])
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=[pdf_file, prompt]
+    )
     
     response_text = response.text.strip()
     
@@ -332,6 +339,12 @@ Return raw JSON only. No ```json blocks. No explanations before or after."""
     
     # Validate keys
     validated_json = validate_json_keys(extracted_json, sample_json)
+    
+    # Clean up uploaded file
+    try:
+        client.files.delete(name=pdf_file.name)
+    except:
+        pass
     
     print("  ✓ JSON extracted and validated")
     
@@ -438,11 +451,15 @@ STRICT RULES:
 
 OUTPUT: Return ONLY raw LaTeX code. No ```latex blocks. No explanations."""
 
-    model = genai.GenerativeModel(GEMINI_MODEL)
-    pdf_file = genai.upload_file(pdf_path, mime_type="application/pdf")
+    # Upload PDF file
+    print("  Uploading PDF to Gemini...")
+    pdf_file = client.files.upload(file=pdf_path)
     
     print("  Calling Gemini API...")
-    response = model.generate_content([pdf_file, prompt])
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=[pdf_file, prompt]
+    )
     
     latex_content = response.text.strip()
     
@@ -450,6 +467,12 @@ OUTPUT: Return ONLY raw LaTeX code. No ```latex blocks. No explanations."""
     if latex_content.startswith("```"):
         latex_content = re.sub(r'^```(?:latex|tex)?\s*', '', latex_content)
         latex_content = re.sub(r'\s*```$', '', latex_content)
+    
+    # Clean up uploaded file
+    try:
+        client.files.delete(name=pdf_file.name)
+    except:
+        pass
     
     # Validate completeness
     validate_latex_completeness(latex_content)
