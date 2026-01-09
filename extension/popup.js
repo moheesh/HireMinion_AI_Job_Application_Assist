@@ -71,6 +71,13 @@ function setButtons(disabled) {
   document.querySelectorAll('button').forEach(btn => btn.disabled = disabled);
 }
 
+// Extract filename from full path
+function getFileName(path) {
+  if (!path) return null;
+  // Handle both forward and backslashes
+  return path.split(/[/\\]/).pop();
+}
+
 // Toggle custom prompt textarea
 chkCustomPrompt.addEventListener('change', () => {
   customPromptBox.style.display = chkCustomPrompt.checked ? 'block' : 'none';
@@ -130,13 +137,30 @@ document.getElementById('scrapeBtn').addEventListener('click', async () => {
       showSuccess('Complete!');
       
       let output = '';
+      let generatedFiles = [];
       
+      // Resume PDF
       if (response.pdf_path) {
-        const pdfName = response.pdf_path.split('/').pop();
-        output += `📄 PDF: http://localhost:8000/api/download-pdf/${pdfName}\n\n`;
+        const pdfName = getFileName(response.pdf_path);
+        generatedFiles.push(`📄 ${pdfName}`);
       }
       
+      // Cover Letter PDF
+      if (response.cover_pdf_path) {
+        const coverName = getFileName(response.cover_pdf_path);
+        generatedFiles.push(`✉️ ${coverName}`);
+      }
+      
+      // Show generated files
+      if (generatedFiles.length > 0) {
+        output += 'Generated:\n';
+        output += generatedFiles.join('\n') + '\n';
+        output += `\n📁 Output: ${response.output_folder}\n`;
+      }
+      
+      // Custom Output
       if (response.custom_output) {
+        if (output) output += '\n';
         output += '--- Custom Output ---\n';
         output += response.custom_output;
       }

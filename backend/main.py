@@ -159,6 +159,7 @@ def run_pipeline(options: dict):
             "success": True, 
             "pdf_path": str(resume_pdf_path) if resume_pdf_path else None,
             "cover_pdf_path": str(cover_pdf_path) if cover_pdf_path else None,
+            "output_folder": OUTPUT_DIR,
             "custom_output": custom_output
         }
             
@@ -204,6 +205,7 @@ async def save_html(req: ScrapeRequest, background_tasks: BackgroundTasks):
             "metadata": metadata,
             "pdf_path": result.get("pdf_path"),
             "cover_pdf_path": result.get("cover_pdf_path"),
+            "output_folder": result.get("output_folder"),
             "custom_output": result.get("custom_output")
         }
         
@@ -357,7 +359,7 @@ async def clear_downloaded():
     """Clear all files in downloaded folder"""
     try:
         for f in os.listdir(DOWNLOADED_DIR):
-            if f != ".keep":
+            if f != ".gitkeep":
                 os.remove(os.path.join(DOWNLOADED_DIR, f))
         return {"success": True, "message": "Cleared downloaded folder"}
     except Exception as e:
