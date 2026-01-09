@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from cleaning import clean_file
 from gemini_client import tailor_resume
 from latex_compiler import auto_compile
+from cover_letter_compiler import auto_compile as auto_compile_cover
 from supabase_job_storage import JobStorage
 
 app = FastAPI()
@@ -71,17 +72,17 @@ def run_pipeline(options: dict):
         generate_cover = options.get("coverLetter", False)
         
         # Step 1: Clean HTML
-        print("\n[1/4] Cleaning HTML...")
+        print("\n[1/5] Cleaning HTML...")
         clean_result = clean_file()
-        print(f"  ✔ Cleaned: {clean_result['text_path']}")
+        print(f"  ✓ Cleaned: {clean_result['text_path']}")
         
         # Step 2: Tailor with Gemini
-        print("\n[2/4] Processing with Gemini...")
+        print("\n[2/5] Processing with Gemini...")
         tailor_result = tailor_resume()
         custom_output = tailor_result.get("custom_output")
         
         # Step 3: Validate job details before storing
-        print("\n[3/4] Validating job details...")
+        print("\n[3/5] Validating job details...")
         job_details_path = os.path.join(DOWNLOADED_DIR, "job_details.json")
         
         if os.path.exists(job_details_path):
@@ -96,11 +97,11 @@ def run_pipeline(options: dict):
                     "error": error_msg,
                     "custom_output": custom_output
                 }
-            print("  ✔ Job details validated")
+            print("  ✓ Job details validated")
             
             # Store to Supabase + local archive
             job_storage.store(job_details_path)
-            print("  ✔ Stored to Supabase")
+            print("  ✓ Stored to Supabase")
             
             tailored_resume_path = os.path.join(DOWNLOADED_DIR, "tailored_resume.json")
             if os.path.exists(tailored_resume_path):
@@ -113,23 +114,42 @@ def run_pipeline(options: dict):
                 "custom_output": custom_output
             }
         
-        # Step 4: Compile to PDF only if resume is checked
-        pdf_path = None
+        # Step 4: Compile Resume PDF
+        resume_pdf_path = None
         if generate_resume:
-            print("\n[4/4] Compiling PDF...")
-            pdf_path = auto_compile()
+            print("\n[4/5] Compiling Resume PDF...")
+            resume_pdf_path = auto_compile()
             
-            if pdf_path:
-                print(f"  ✔ PDF generated: {pdf_path}")
+            if resume_pdf_path:
+                print(f"  ✓ Resume PDF generated: {resume_pdf_path}")
             else:
-                print("  ✗ PDF compilation failed")
+                print("  ✗ Resume PDF compilation failed")
                 return {
                     "success": False, 
-                    "error": "PDF compilation failed",
+                    "error": "Resume PDF compilation failed",
                     "custom_output": custom_output
                 }
         else:
-            print("\n[4/4] Skipping PDF compilation (resume not selected)")
+            print("\n[4/5] Skipping Resume PDF (not selected)")
+        
+        # Step 5: Compile Cover Letter PDF
+        cover_pdf_path = None
+        if generate_cover:
+            print("\n[5/5] Compiling Cover Letter PDF...")
+            cover_pdf_path = auto_compile_cover()
+            
+            if cover_pdf_path:
+                print(f"  ✓ Cover Letter PDF generated: {cover_pdf_path}")
+            else:
+                print("  ✗ Cover Letter PDF compilation failed")
+                return {
+                    "success": False, 
+                    "error": "Cover Letter PDF compilation failed",
+                    "custom_output": custom_output,
+                    "resume_pdf_path": str(resume_pdf_path) if resume_pdf_path else None
+                }
+        else:
+            print("\n[5/5] Skipping Cover Letter PDF (not selected)")
         
         print("\n" + "="*50)
         print("Pipeline complete!")
@@ -137,7 +157,8 @@ def run_pipeline(options: dict):
         
         return {
             "success": True, 
-            "pdf_path": str(pdf_path) if pdf_path else None,
+            "pdf_path": str(resume_pdf_path) if resume_pdf_path else None,
+            "cover_pdf_path": str(cover_pdf_path) if cover_pdf_path else None,
             "custom_output": custom_output
         }
             
@@ -170,8 +191,8 @@ async def save_html(req: ScrapeRequest, background_tasks: BackgroundTasks):
         with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, indent=2)
         
-        print(f"✔ Saved HTML to {html_path}")
-        print(f"✔ Saved metadata: {metadata}")
+        print(f"✓ Saved HTML to {html_path}")
+        print(f"✓ Saved metadata: {metadata}")
         
         # Run pipeline with options
         result = run_pipeline(req.options)
@@ -182,6 +203,7 @@ async def save_html(req: ScrapeRequest, background_tasks: BackgroundTasks):
             "error": result.get("error") if not result["success"] else None,
             "metadata": metadata,
             "pdf_path": result.get("pdf_path"),
+            "cover_pdf_path": result.get("cover_pdf_path"),
             "custom_output": result.get("custom_output")
         }
         
@@ -272,12 +294,14 @@ async def get_status():
     """Get current pipeline status"""
     meta_path = os.path.join(DOWNLOADED_DIR, "metadata.json")
     tailored_path = os.path.join(DOWNLOADED_DIR, "tailored_resume.json")
+    tailored_cover_path = os.path.join(DOWNLOADED_DIR, "tailored_cover.json")
     job_details_path = os.path.join(DOWNLOADED_DIR, "job_details.json")
     custom_output_path = os.path.join(DOWNLOADED_DIR, "custom_output.json")
     
     status = {
         "has_metadata": os.path.exists(meta_path),
         "has_tailored_resume": os.path.exists(tailored_path),
+        "has_tailored_cover": os.path.exists(tailored_cover_path),
         "has_job_details": os.path.exists(job_details_path),
         "has_custom_output": os.path.exists(custom_output_path),
         "output_pdfs": [f for f in os.listdir(OUTPUT_DIR) if f.endswith('.pdf')] if os.path.exists(OUTPUT_DIR) else []

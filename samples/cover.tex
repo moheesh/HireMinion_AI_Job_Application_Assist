@@ -1,0 +1,49 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,linkcolor=blue!70,urlcolor=blue!70]{hyperref}
+\usepackage{xcolor}
+\usepackage{parskip}
+\pagestyle{empty}
+
+\begin{document}
+
+% --- HEADER ---
+\begin{center}
+{\Large\bfseries \VAR{personal_info.name}}\\[2pt]
+\VAR{personal_info.location} \, | \, \VAR{personal_info.email} \, | \, \VAR{personal_info.phone} \, | \, \href{\VAR{personal_info.linkedin_url}}{LinkedIn} \, | \, \href{\VAR{personal_info.github_url}}{GitHub}
+\end{center}
+\hrule
+\vspace{1em}
+
+% --- DATE & RECIPIENT ---
+\today
+
+\vspace{0.5em}
+\VAR{recipient} \\
+\VAR{company}
+\vspace{1em}
+
+% --- SUBJECT LINE ---
+\textbf{Re: \VAR{role} Application}
+
+\vspace{0.5em}
+
+% --- SALUTATION ---
+Dear \VAR{recipient},
+
+% --- BODY PARAGRAPHS ---
+\BLOCK{for paragraph in paragraphs}
+\VAR{paragraph}
+
+\BLOCK{endfor}
+% --- CLOSING ---
+\VAR{closing}
+
+\vspace{0.5em}
+Sincerely,
+
+\vspace{1.5em}
+\VAR{personal_info.name}
+
+\end{document}

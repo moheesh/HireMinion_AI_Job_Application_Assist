@@ -700,16 +700,18 @@ Structure:
 }
 
 ### Cover Letter Rules:
-- Do NOT open with "I am excited to apply..."
-- DO open with relevance: "Your need for a Data Engineer to support the Life Data Lakehouse aligns directly with my experience building..."
-- Reference 2-3 exact JD requirements by name
-- Tie them to specific experience with metrics
-- Stay under 3 short paragraphs
-- Use Mirror Technique (match JD terminology exactly)
-- Use power verbs, avoid passive language
-- Address any obvious gaps proactively (e.g., "While my cloud experience is primarily Azure, the architectural patterns translate directly to AWS...")
-- If it reads like a resume in paragraph form, it's wrong
-- Do NOT fabricate experience
+- Do NOT open with "I am excited to apply..." or generic enthusiasm
+- Open with direct relevance to the role and company's specific need
+- Reference 2-3 exact requirements from the JD by name
+- Tie each requirement to specific experience with metrics from resume
+- Keep to 3 short paragraphs max
+- Mirror JD terminology exactly (if they say "data pipelines", you say "data pipelines")
+- Use power verbs (built, led, optimized, delivered), avoid passive language
+- Address obvious gaps proactively with transferable skills
+- Do NOT rewrite the resume in paragraph form
+- Do NOT fabricate or exaggerate experience
+- Show understanding of the company's product/domain if mentioned in JD
+- End with confidence, not desperation
 
 ---
 
