@@ -9,3 +9,6 @@ python backend/email_orchestrator.py --full
 
 python backend/email_orchestrator.py
 python backend/email_reach/send_email.py
+
+
+python backend/latex_compiler.py auto 
